@@ -1,0 +1,37 @@
+/* PdfViewer.css */
+.pdf-viewer-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100vw;
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+  background-color: #f4f4f4;
+}
+
+.navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 20px;
+}
+
+.navigation button {
+  padding: 8px 12px;
+  margin: 0 10px;
+  cursor: pointer;
+}
+
+.pdf-document {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: 90vw;
+}
+
+.pdf-document .react-pdf__Page {
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
