@@ -1,21 +1,3 @@
-// // App.jsx
-// import React from 'react';
-// import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-// import FileUpload from './components/FileUpload/FileUpload';
-
-// const App = () => {
-//   return (
-//     <Router>
-//       <Routes>
-//         <Route path="/" element={<FileUpload />} />
-//       </Routes>
-//     </Router>
-//   );
-// };
-
-// export default App;
-
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import FileUpload from './components/FileUpload/FileUpload';
@@ -33,3 +15,5 @@ function App() {
 }
 
 export default App;
+
+

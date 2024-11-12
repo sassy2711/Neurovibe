@@ -1,37 +1,91 @@
 /* PdfViewer.css */
+
 .pdf-viewer-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100vw;
-  min-height: 100vh;
-  padding: 20px;
-  box-sizing: border-box;
-  background-color: #f4f4f4;
-}
-
-.navigation {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  max-width: 800px;
-  margin-bottom: 20px;
-}
-
-.navigation button {
-  padding: 8px 12px;
-  margin: 0 10px;
-  cursor: pointer;
-}
-
-.pdf-document {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  max-width: 90vw;
-}
-
-.pdf-document .react-pdf__Page {
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-}
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .navigation button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .navigation button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+  
+  .navigation button:hover:not(:disabled) {
+    background-color: #0056b3;
+  }
+  
+  .navigation span {
+    font-size: 16px;
+  }
+  
+  .toggle-bionic-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .toggle-bionic-btn:hover {
+    background-color: #218838;
+  }
+  
+  .pdf-document {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  .pdf-viewer-container .bionic-reading {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+  }
+  
+  .bionic-reading article {
+    font-size: 18px;
+    line-height: 1.6;
+  }
+  
+  .bionic-reading p {
+    margin: 0;
+    padding: 0;
+  }
+  
+  .pdf-viewer-container .pdf-document .react-pdf__Page {
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  

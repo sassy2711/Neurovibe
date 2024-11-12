@@ -1,109 +1,8 @@
-// //PdfViewer.js
-// import React, { useState, useEffect } from 'react';
-// import { Document, Page, pdfjs } from 'react-pdf';
-// import { useLocation } from 'react-router-dom';
-// import axios from 'axios';
-// import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
-// import 'react-pdf/dist/esm/Page/TextLayer.css';
-// import './PdfViewer.css';  // Import a separate CSS file for styling
-
-// // Configure PDF.js worker
-// pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-//   'pdfjs-dist/build/pdf.worker.min.mjs',
-//   import.meta.url,
-// ).toString();
-
-// const PdfViewer = () => {
-//   const location = useLocation();
-//   const { selectedFile } = location.state || {};  // Get selectedFile from state
-//   const [pdfUrlState, setPdfUrlState] = useState(null); // Add state for pdfUrl
-//   const [numPages, setNumPages] = useState(null);
-//   const [pageNumber, setPageNumber] = useState(1);
-
-//   // Check localStorage for a persisted PDF file if not passed via state
-//   useEffect(() => {
-//     const storedPdf = localStorage.getItem('pdfFile');
-
-//     if (storedPdf) {
-//       // Decode the base64-encoded string back into a Blob
-//       const byteCharacters = atob(storedPdf); // Decode base64 string to binary
-//       const byteArrays = [];
-
-//       for (let offset = 0; offset < byteCharacters.length; offset += 1024) {
-//         const slice = byteCharacters.slice(offset, offset + 1024);
-//         const byteNumbers = new Array(slice.length);
-//         for (let i = 0; i < slice.length; i++) {
-//           byteNumbers[i] = slice.charCodeAt(i);
-//         }
-//         byteArrays.push(new Uint8Array(byteNumbers));
-//       }
-
-//       const blob = new Blob(byteArrays, { type: 'application/pdf' });
-//       const newPdfUrl = URL.createObjectURL(blob);
-//       setPdfUrlState(newPdfUrl); // Set the new pdfUrl
-//     } else if (selectedFile) {
-//       // If no stored file, fetch it from the server
-//       const fetchPdfUrl = async () => {
-//         try {
-//           const fileResponse = await axios.get(`http://localhost:8080/api/files/download/${selectedFile}`, {
-//             responseType: 'blob',
-//           });
-          
-//           // Create a base64 string from the Blob
-//           const reader = new FileReader();
-//           reader.onloadend = () => {
-//             const base64Pdf = reader.result.split(',')[1]; // Get base64 part
-//             localStorage.setItem('pdfFile', base64Pdf);  // Store in localStorage
-//             const newPdfUrl = URL.createObjectURL(fileResponse.data);
-//             setPdfUrlState(newPdfUrl);  // Set the new pdfUrl
-//           };
-//           reader.readAsDataURL(fileResponse.data);
-//         } catch (error) {
-//           console.error('Error fetching file content:', error);
-//         }
-//       };
-//       fetchPdfUrl();
-//     }
-//   }, [selectedFile]);  // Trigger fetch only if selectedFile changes
-
-//   const onDocumentLoadSuccess = ({ numPages }) => {
-//     setNumPages(numPages);
-//   };
-
-//   const goToPreviousPage = () => setPageNumber((prevPage) => Math.max(prevPage - 1, 1));
-//   const goToNextPage = () => setPageNumber((prevPage) => Math.min(prevPage + 1, numPages));
-
-//   return (
-//     <div className="pdf-viewer-container">
-//       <h2>PDF Viewer</h2>
-//       <div className="navigation">
-//         <button onClick={goToPreviousPage} disabled={pageNumber === 1}>
-//           Previous
-//         </button>
-//         <span>
-//           Page {pageNumber} of {numPages}
-//         </span>
-//         <button onClick={goToNextPage} disabled={pageNumber === numPages}>
-//           Next
-//         </button>
-//       </div>
-//       {pdfUrlState && (
-//         <div className="pdf-document">
-//           <Document file={pdfUrlState} onLoadSuccess={onDocumentLoadSuccess}>
-//             <Page pageNumber={pageNumber} width={window.innerWidth * 0.8} />
-//           </Document>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default PdfViewer;
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
+import bionicReading from 'data-bionic-reading';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 import './PdfViewer.css';  // Import a separate CSS file for styling
@@ -121,6 +20,10 @@ const PdfViewer = () => {
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1); // Default to page 1
   const [fileProgress, setFileProgress] = useState(0); // Store the file's read progress
+  const [bionicText, setBionicText] = useState(""); // State to store extracted text in Bionic format
+  const [isBionic, setIsBionic] = useState(false); // Toggle between PDF and Bionic View
+
+  const pageTextRef = useRef("");
 
   // Fetch PDF URL from server and progress from backend
   useEffect(() => {
@@ -178,6 +81,33 @@ const PdfViewer = () => {
     updateProgress(newPage);
   };
 
+  // Extract text from the current page
+  const extractTextFromPage = async (pageNum) => {
+    const pdfDoc = await pdfjs.getDocument(pdfUrlState).promise;
+    const page = await pdfDoc.getPage(pageNum);
+    const textContent = await page.getTextContent();
+    let pageText = textContent.items.map(item => item.str).join(" ");
+    pageTextRef.current = pageText; // Store text for future use
+    return pageText;
+  };
+
+  // Toggle to Bionic Reading format
+  const toggleBionicReading = async () => {
+    if (!isBionic) {
+      // Extract text for the current page
+      const text = await extractTextFromPage(pageNumber);
+      setBionicText(text); // Set text to bionic
+    }
+    setIsBionic(prevState => !prevState); // Toggle the view
+  };
+
+  // Use useEffect to apply bionicReading() whenever the bionicText is updated
+  useEffect(() => {
+    if (isBionic && bionicText) {
+      bionicReading(); // Apply Bionic Reading after text is set
+    }
+  }, [isBionic, bionicText]);
+
   return (
     <div className="pdf-viewer-container">
       <h2>PDF Viewer</h2>
@@ -192,12 +122,26 @@ const PdfViewer = () => {
           Next
         </button>
       </div>
-      {pdfUrlState && (
-        <div className="pdf-document">
-          <Document file={pdfUrlState} onLoadSuccess={onDocumentLoadSuccess}>
-            <Page pageNumber={pageNumber} width={window.innerWidth * 0.8} />
-          </Document>
+
+      {/* Toggle Button */}
+      <button onClick={toggleBionicReading} className="toggle-bionic-btn">
+        {isBionic ? 'Back to PDF' : 'Show Bionic'}
+      </button>
+
+      {isBionic ? (
+        <div className="bionic-reading">
+          <article data-bionic-reading>
+            <p>{bionicText}</p>
+          </article>
         </div>
+      ) : (
+        pdfUrlState && (
+          <div className="pdf-document">
+            <Document file={pdfUrlState} onLoadSuccess={onDocumentLoadSuccess}>
+              <Page pageNumber={pageNumber} width={window.innerWidth * 0.8} />
+            </Document>
+          </div>
+        )
       )}
     </div>
   );
