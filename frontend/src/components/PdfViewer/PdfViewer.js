@@ -22,6 +22,7 @@ const PdfViewer = () => {
   const [fileProgress, setFileProgress] = useState(0); // Store the file's read progress
   const [bionicText, setBionicText] = useState(""); // State to store extracted text in Bionic format
   const [isBionic, setIsBionic] = useState(false); // Toggle between PDF and Bionic View
+  const [zoomLevel, setZoomLevel] = useState(1); // State for zoom level (1 = 100%)
 
   const pageTextRef = useRef("");
 
@@ -108,6 +109,16 @@ const PdfViewer = () => {
     }
   }, [isBionic, bionicText]);
 
+  // Handle Zoom In
+  const zoomIn = () => {
+    setZoomLevel(prevZoom => Math.min(prevZoom + 0.1, 1)); // Max zoom level to 100% (zoomLevel = 1)
+  };
+
+  // Handle Zoom Out
+  const zoomOut = () => {
+    setZoomLevel(prevZoom => Math.max(prevZoom - 0.1, 0)); // Min zoom level to 0% (zoomLevel = 0)
+  };
+
   return (
     <div className="pdf-viewer-container">
       <h2>PDF Viewer</h2>
@@ -121,6 +132,13 @@ const PdfViewer = () => {
         <button onClick={goToNextPage} disabled={pageNumber === numPages}>
           Next
         </button>
+      </div>
+
+      {/* Zoom Controls */}
+      <div className="zoom-controls">
+        <button onClick={zoomOut}>-</button>
+        <span>Zoom: {Math.round(zoomLevel * 100)}%</span>
+        <button onClick={zoomIn}>+</button>
       </div>
 
       {/* Toggle Button */}
@@ -138,7 +156,7 @@ const PdfViewer = () => {
         pdfUrlState && (
           <div className="pdf-document">
             <Document file={pdfUrlState} onLoadSuccess={onDocumentLoadSuccess}>
-              <Page pageNumber={pageNumber} width={window.innerWidth * 0.8} />
+              <Page pageNumber={pageNumber} width={window.innerWidth * 0.8 * zoomLevel} />
             </Document>
           </div>
         )
